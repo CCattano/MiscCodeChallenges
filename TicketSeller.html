@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head></head>
+<body>
+	<span>
+		<label><strong>Problem Description:</strong></label>
+		<p>
+			A new movie has just been released!<br /><br />
+			There are a lot of people at the cinema box office standing in a huge line.<br /><br />
+			Each of them has a single 100, 50 or 25 dollar bill. A movie ticket costs 25 dollars.<br /><br />
+			Vasya is currently working as a clerk. He wants to sell a ticket to every single person in this line.<br /><br />
+			Can Vasya sell a ticket to every person and give change if he initially has no money and sells the tickets strictly in the order people queue?
+		</p>
+		<br />
+		<label for="purchaseLine"><strong>Bills held by people in line:</strong></label>
+		<br />
+		<textarea id="purchaseLine" oninput="autoGrow(this)" style="width: 30vw; min-height: 1vh; max-height: 5vh;">
+25, 50, 25, 100, 25, 25, 25, 100, 25, 25, 50, 100, 100, 50
+		</textarea>
+		<br /><br />
+		<button id="startCheckBtn">Check</button>
+		<br /><br />
+		<label id="result"></label>
+		<br /><br />
+		<label id="time"></label>
+		<br /><br /><br />
+		<label><strong>Alternative bill combinations to try:</strong></label>
+		<p>
+			25, 50, 25, 100, 25, 25, 25, 100, 25, 25, 25, 100
+			<br /><br />25, 25, 25, 100, 25, 25, 25, 100, 25, 50, 25, 100, 25, 50, 25, 100, 25, 50, 25, 100, 100, 50
+			<br /><br />25, 50, 25, 100, 25, 25, 25, 100, 25, 50, 25, 100
+			<br /><br />25, 25, 50, 100, 25, 25, 25, 100, 25, 50, 25, 100, 25, 25, 50, 100
+			<br /><br />25, 25, 25, 100, 25, 25, 25, 100, 25, 25, 50, 100, 25, 25, 50, 100
+			<br /><br />25, 25, 50, 100, 25, 25, 25, 100, 25, 50, 25, 100, 25, 25, 25, 100, 25, 50, 50, 25
+			<br /><br />25, 50, 25, 100, 25, 25, 50, 100, 25, 25, 50, 100, 25, 25, 25, 100, 25, 50, 25, 100
+			<br /><br />25, 50, 25, 100, 25, 25, 25, 100, 25, 25, 50, 100, 100, 50
+			<br /><br />25, 25, 50, 100, 25, 50, 25, 100, 25, 25, 25, 100, 25, 25, 50, 100, 25, 50, 25, 100, 25, 100, 100
+			<br /><br />25, 25, 50, 100, 25, 25, 25, 100, 25, 25, 25, 100, 25, 25, 50, 100
+			<br /><br />25, 50, 25, 100, 25, 50, 25, 100, 25, 25, 25, 100, 25, 50, 25, 100, 25, 25, 50, 100, 25, 50, 50, 50
+			<br /><br />25, 25, 25, 100, 25, 25, 25, 100, 25, 25, 25, 100
+		</p>
+	</span>
+	<script>
+		console.clear();
+
+		//LIFECYCLE FUNCTIONALITY
+		const startBtn = document.getElementById("startCheckBtn");
+		startBtn.onclick = checkLine;
+
+		//UI METHODS
+		function checkLine() {
+			const purchaseLine = document.getElementById("purchaseLine");
+			debugger;
+			const peopleInLine =
+				purchaseLine.value
+					.trim().replace(/[\s\r\n]/g, "").split(",")
+					.filter(bill => bill != undefined && bill !== null && bill !== "")
+					.map(bill => parseInt(bill));
+			var start = window.performance.now();
+			var finish;
+
+			const canSellToAll = checkBills(peopleInLine);
+
+			finish = window.performance.now();
+			document.getElementById("result").innerHTML = canSellToAll ? "<strong><u>Can</u></strong> sell a ticket to all line memebers." : "<strong><u>Cannot</u></strong> sell a ticket to all line members";
+			document.getElementById("time").innerHTML = `Problem Solved In: ${(finish - start)}ms`;
+		}
+
+		//VERIFICATION METHOD
+		function checkBills(peopleInLine) {
+			console.log(peopleInLine);
+			let moneyOnHand = [0, 0, 0];
+			let canSellToAll = true;
+			peopleInLine.forEach((bill, i) => {
+				let change = bill - 25;
+				//console.log(`person ${i}`);
+				//console.log(`\tbill - ${bill}`);
+				//console.log(`\tchange - ${change}`);
+				//console.log(`\tMoney on hand before ${moneyOnHand}`);
+				if (change > 0) {
+					switch (change) {
+						case 25:
+							if (moneyOnHand[0] > 0) {
+								moneyOnHand[0]--;
+							} else {
+								canSellToAll = false;
+								return;
+							}
+							break;
+						case 75:
+							if (moneyOnHand[1] > 0 && moneyOnHand[0] > 0) {
+								moneyOnHand[1]--;
+								moneyOnHand[0]--;
+							} else if (moneyOnHand[0] >= 3) {
+								moneyOnHand[0] -= 3;
+							} else {
+								canSellToAll = false;
+								return;
+							}
+							break;
+					}
+					switch (bill) {
+						case 25:
+							moneyOnHand[0]++;
+							break;
+						case 50:
+							moneyOnHand[1]++;
+							break;
+						case 100:
+							moneyOnHand[2]++;
+							break;
+					}
+				} else {
+					moneyOnHand[0]++;
+				}
+				//console.log(`\tMoney on hand after ${moneyOnHand}`);
+			});
+			return canSellToAll;
+		}
+
+		//UI HELPER METHOD
+		function autoGrow(element) {
+			element.style.height = "5px";
+			element.style.height = `${element.scrollHeight}px`;
+		}
+	</script>
+</body>
+<footer style="position: absolute; bottom: 0;">
+	<label><strong>Original Problem Sourced From:</strong></label>
+	<br />
+	<p>https://www.codewars.com/kata/555615a77ebc7c2c8a0000b8/train/javascript</p>
+</footer>
+</html>

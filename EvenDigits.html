@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+	<head></head>
+	<body>
+		<label>Input</label>
+		<input id="input"/>
+		<br />
+		<br />
+		<button id="submitBtn">Calculate</button>
+		<br />
+		<br />
+		<label id="result"></label>
+		<br />
+		<br />
+		<label id="time"></label>		
+		<script>
+			document.getElementById("submitBtn").onclick = calculateResult;
+			
+			function printResult(output, time)
+			{
+				document.getElementById("result").innerHTML = output;
+				document.getElementById("time").innerHTML = `Problem Solved In: ${time}ms`;
+			}
+			
+			function formatResult(val) {
+            	let resultStr = val.toString().split("").reverse().map((o, i, a) => (i % 3 === 0) ? `${o},` : o).reverse().join("");
+				return resultStr.endsWith(",") ? resultStr.slice(0, -1) : resultStr;
+			}
+						
+			function getNum(digits, direction) {
+				//direction === 0 == add
+				//direction === 1 == subtract
+				return digits
+					.map(digit => {
+						const val = parseInt(digit);
+						let result = val;
+						if(direction === 0 && val === 9) { return "0"; }
+						if(direction === 1 && val === 0) { result = 9; }
+						while(result % 2 !== 0) {
+							direction === 0 ? result++ : result--;
+						}
+						return `${result}`;
+					})
+					.join("");
+			}
+				
+			function calculateResult() {
+				const startTime = window.performance.now();
+				let finishTime;
+				let finalTime;
+				let output = "";
+				
+				const input = BigInt(document.getElementById("input").value);
+				const digits = input.toString().split("");
+				
+				const oddDigitIndex = digits.findIndex(digit => digit % 3 === 0);				
+				if(oddDigitIndex === -1) {
+					//There are no odd numbers
+					finishTime = window.performance.now();
+					output = "Number contains all even digits. 0 iterations required";
+					finalTime = finishTime - startTime;
+					printResult(output, finalTime);
+					return;
+				}
+				
+				const addEndNum = BigInt(getNum(digits, 0));
+				const subtractEndNum = BigInt(getNum(digits, 1));
+				
+				const addPasses = addEndNum - input;
+				const subtractPasses = input - subtractEndNum;
+				
+				if(addPasses > subtractPasses) {
+					finishTime = window.performance.now();					
+					output = `Required ${formatResult(subtractPasses)} subtraction pass${subtractPasses == 1 ? '' : 'es'} to reach ${subtractEndNum}`;					
+				} else if (subtractPasses > addPasses) {
+					finishTime = window.performance.now();
+					output = `Required ${formatResult(addPasses)} addition pass${addPasses == 1 ? '' : 'es'} to reach ${addEndNum}`;				
+				}
+				
+				finalTime = finishTime - startTime;				
+				printResult(output, finalTime);					
+			}
+		</script>
+	</body>
+</html>
